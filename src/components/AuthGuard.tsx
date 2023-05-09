@@ -1,28 +1,28 @@
-import { PropsWithChildren, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { Outlet, Navigate } from "react-router-dom"
 
-import { INDEX } from "../constants/routes"
+import { DASHBOARD, INDEX } from "../constants/routes"
 import useAuthenticatedUser from "../hooks/authenticated-user"
 
-const AuthGuard = ({ children }: PropsWithChildren) => {
-  const navigate = useNavigate()
+type Props = {
+  allow?: "authenticated" | "anonymous"
+}
+
+const AuthGuard = ({ allow = "authenticated" }: Props) => {
   const [user, loading] = useAuthenticatedUser()
 
-  useEffect(() => {
-    if (loading) {
-      return
-    }
-
-    if (!user) {
-      navigate(INDEX)
-    }
-  }, [loading, navigate, user])
-
-  if (!loading && user) {
-    return <>{children}</>
+  if (loading) {
+    return null
   }
 
-  return null
+  if (allow === "anonymous" && user) {
+    return <Navigate to={DASHBOARD} />
+  }
+
+  if (allow === "authenticated" && !user) {
+    return <Navigate to={INDEX} />
+  }
+
+  return <Outlet />
 }
 
 export default AuthGuard

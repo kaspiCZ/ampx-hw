@@ -31,25 +31,57 @@ describe("components/AuthGuard", () => {
     vi.clearAllMocks()
   })
 
-  it("navigates to /", () => {
-    history.push("/someroute")
+  describe("protected routes", () => {
+    it("redirects anonymous to /", () => {
+      history.push("/someroute")
 
-    const mockedHook = useAuthenticatedUser as Mock
-    mockedHook.mockImplementation(() => [undefined, false])
+      const mockedHook = useAuthenticatedUser as Mock
+      mockedHook.mockImplementation(() => [undefined, false])
 
-    render(<AuthGuard />, { wrapper })
+      render(<AuthGuard />, { wrapper })
 
-    expect(history.location.pathname).toBe("/")
+      expect(history.location.pathname).toBe("/")
+    })
+
+    it("does not redirect user", async () => {
+      history.push("/someroute")
+
+      const mockedHook = useAuthenticatedUser as Mock
+      mockedHook.mockImplementation(() => [
+        { email: "test@example.com" },
+        false,
+      ])
+
+      render(<AuthGuard />, { wrapper })
+
+      expect(history.location.pathname).toBe("/someroute")
+    })
   })
 
-  it("does not navigate", async () => {
-    history.push("/someroute")
+  describe("anonymous routes", () => {
+    it("does not redirect anonymous", () => {
+      history.push("/someroute")
 
-    const mockedHook = useAuthenticatedUser as Mock
-    mockedHook.mockImplementation(() => [{ email: "test@example.com" }, false])
+      const mockedHook = useAuthenticatedUser as Mock
+      mockedHook.mockImplementation(() => [undefined, false])
 
-    render(<AuthGuard />, { wrapper })
+      render(<AuthGuard allow="anonymous" />, { wrapper })
 
-    expect(history.location.pathname).toBe("/someroute")
+      expect(history.location.pathname).toBe("/someroute")
+    })
+
+    it("redirects user to /", async () => {
+      history.push("/someroute")
+
+      const mockedHook = useAuthenticatedUser as Mock
+      mockedHook.mockImplementation(() => [
+        { email: "test@example.com" },
+        false,
+      ])
+
+      render(<AuthGuard allow="anonymous" />, { wrapper })
+
+      expect(history.location.pathname).toBe("/home")
+    })
   })
 })
