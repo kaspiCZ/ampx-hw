@@ -1,23 +1,53 @@
-import { useTransition } from "react"
+import { useState, useTransition } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
+import { useSetRecoilState } from "recoil"
 
 import {
   AppBar,
   Box,
   Button,
   IconButton,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
   Toolbar,
   Typography,
 } from "@mui/material"
-import { Menu as MenuIcon } from "@mui/icons-material"
+import { Add, Menu as MenuIcon, Remove } from "@mui/icons-material"
 
+import { MonetaryOperation } from "../types"
 import { SIGN_IN, SIGN_OUT } from "../constants/routes"
+import { incomeExpenseModalOpen } from "../state/atoms/ui"
 import useAuthenticatedUser from "../hooks/authenticated-user"
 
+import IncomeExpenseModal from "./IncomeExpenseModal"
+
 const AppLayout = () => {
-  const [, startTransition] = useTransition()
   const navigate = useNavigate()
+  const [, startTransition] = useTransition()
   const [user, loading] = useAuthenticatedUser()
+  const [monetaryOperation, setMonetaryOperation] =
+    useState<MonetaryOperation>("expense")
+  const setModalOpen = useSetRecoilState(incomeExpenseModalOpen)
+
+  const actions = [
+    {
+      name: "Add expense",
+      icon: <Remove color="error" />,
+      onClick: () => {
+        setMonetaryOperation("expense")
+        setModalOpen(true)
+      },
+    },
+    {
+      name: "Add income",
+      icon: <Add color="success" />,
+      onClick: () => {
+        setMonetaryOperation("income")
+        setModalOpen(true)
+      },
+    },
+  ].reverse()
 
   return (
     <>
@@ -73,6 +103,21 @@ const AppLayout = () => {
       <Box sx={{ flexDirection: "column", flexGrow: 1 }}>
         <Outlet />
       </Box>
+      <SpeedDial
+        ariaLabel="What do you want to do?"
+        sx={{ position: "absolute", bottom: 16, right: 16 }}
+        icon={<SpeedDialIcon />}
+      >
+        {actions.map((action) => (
+          <SpeedDialAction
+            key={action.name}
+            icon={action.icon}
+            tooltipTitle={action.name}
+            onClick={action.onClick}
+          />
+        ))}
+      </SpeedDial>
+      <IncomeExpenseModal preselect={monetaryOperation} />
     </>
   )
 }
