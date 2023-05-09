@@ -13,9 +13,7 @@ const useAuthenticatedUser = (): [User | undefined, boolean] => {
         setUser(newUserValue)
       }
 
-      if (newUserValue) {
-        setLoading(false)
-      }
+      setLoading(false)
     })
   }, [user])
 
