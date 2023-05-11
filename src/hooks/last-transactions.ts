@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRecoilValue } from "recoil"
 import {
   collection,
@@ -19,7 +19,7 @@ const useLastTransactions = () => {
   const mappedTags = useRecoilValue(aTags)
   const [transactions, setTransactions] = useState<Transaction[]>()
 
-  useMemo(() => {
+  useEffect(() => {
     try {
       const transactionsSnapshot = query(
         collection(db, "transactions"),
@@ -28,7 +28,7 @@ const useLastTransactions = () => {
         limit(10),
       )
 
-      onSnapshot(transactionsSnapshot, (querySnapshot) => {
+      const unsubscribe = onSnapshot(transactionsSnapshot, (querySnapshot) => {
         setTransactions(
           querySnapshot.docs.map((document) => {
             const { id } = document
@@ -49,6 +49,10 @@ const useLastTransactions = () => {
           }),
         )
       })
+
+      return () => {
+        unsubscribe()
+      }
     } catch (error) {
       console.error(error)
     }

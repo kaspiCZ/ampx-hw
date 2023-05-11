@@ -23,7 +23,7 @@ describe("components/AuthGuard", () => {
 
     const { result } = renderHook(() => useAuthenticatedUser())
 
-    expect(result.current[0]).not.toBeDefined()
+    expect(result.current[0]).toBe(null)
     expect(result.current[1]).toBe(true)
 
     act(() => {

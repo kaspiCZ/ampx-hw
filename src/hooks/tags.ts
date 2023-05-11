@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect } from "react"
 import { useSetRecoilState } from "recoil"
 import { collection, onSnapshot, query, where } from "firebase/firestore"
 
@@ -11,14 +11,14 @@ import { aTags } from "../state/atoms/ui"
 const useTags = () => {
   const setTags = useSetRecoilState(aTags)
 
-  useMemo(() => {
+  useEffect(() => {
     try {
       const tagsSnapshot = query(
         collection(db, "tags"),
         where("uid", "==", auth.currentUser?.uid),
       )
 
-      onSnapshot(tagsSnapshot, (querySnapshot) => {
+      const unsubscribe = onSnapshot(tagsSnapshot, (querySnapshot) => {
         const newTags: Tags = {}
 
         querySnapshot.docs.forEach((document) => {
@@ -27,6 +27,10 @@ const useTags = () => {
 
         setTags(newTags)
       })
+
+      return () => {
+        unsubscribe()
+      }
     } catch (error) {
       console.error(error)
     }

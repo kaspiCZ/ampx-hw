@@ -1,20 +1,19 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { signOut } from "firebase/auth"
 
 import { SIGN_IN } from "../constants/routes"
-import { auth } from "../firebase"
 import useAuthenticatedUser from "../hooks/authenticated-user"
+import { signOut } from "firebase/auth"
+import { auth } from "../firebase"
 
 const SignOut = () => {
-  const navigate = useNavigate()
   const [user] = useAuthenticatedUser()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const executeSignOut = async () => {
       try {
         await signOut(auth)
-
         navigate(SIGN_IN)
       } catch (error) {
         console.error(error)
@@ -26,7 +25,7 @@ const SignOut = () => {
     }
   }, [navigate, user])
 
-  return null
+  return <></>
 }
 
 export default SignOut
