@@ -1,23 +1,56 @@
 import { useTransition } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
-
+import { useSetRecoilState } from "recoil"
 import {
   AppBar,
   Box,
   Button,
   IconButton,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
   Toolbar,
   Typography,
 } from "@mui/material"
-import { Menu as MenuIcon } from "@mui/icons-material"
+import { Add, Menu as MenuIcon, Remove } from "@mui/icons-material"
 
 import { SIGN_IN, SIGN_OUT } from "../constants/routes"
+import {
+  aIncomeExpenseModalOpen,
+  aIncomeExpenseModalState,
+} from "../state/atoms/ui"
 import useAuthenticatedUser from "../hooks/authenticated-user"
+import IncomeExpenseModal from "./IncomeExpenseModal"
 
 const AppLayout = () => {
-  const [, startTransition] = useTransition()
   const navigate = useNavigate()
+  const [, startTransition] = useTransition()
   const [user, loading] = useAuthenticatedUser()
+  const setModalOpen = useSetRecoilState(aIncomeExpenseModalOpen)
+  const setModalData = useSetRecoilState(aIncomeExpenseModalState)
+
+  const actions = [
+    {
+      name: "Add income",
+      icon: <Add color="success" />,
+      onClick: () => {
+        setModalData({
+          monetaryOperation: "income",
+        })
+        setModalOpen(true)
+      },
+    },
+    {
+      name: "Add expense",
+      icon: <Remove color="error" />,
+      onClick: () => {
+        setModalData({
+          monetaryOperation: "expense",
+        })
+        setModalOpen(true)
+      },
+    },
+  ]
 
   return (
     <>
@@ -73,6 +106,21 @@ const AppLayout = () => {
       <Box sx={{ flexDirection: "column", flexGrow: 1 }}>
         <Outlet />
       </Box>
+      <SpeedDial
+        ariaLabel="What do you want to do?"
+        sx={{ position: "absolute", bottom: 16, right: 16 }}
+        icon={<SpeedDialIcon />}
+      >
+        {actions.map((action) => (
+          <SpeedDialAction
+            key={action.name}
+            icon={action.icon}
+            tooltipTitle={action.name}
+            onClick={action.onClick}
+          />
+        ))}
+      </SpeedDial>
+      <IncomeExpenseModal />
     </>
   )
 }

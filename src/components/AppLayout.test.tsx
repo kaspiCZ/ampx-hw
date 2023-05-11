@@ -1,6 +1,7 @@
 import { Mock } from "vitest"
 import { Route, Router, Routes } from "react-router-dom"
 import { MemoryHistory, createMemoryHistory } from "history"
+import { RecoilRoot } from "recoil"
 
 import { RenderOptions, render, screen } from "../utils/test-utils"
 
@@ -16,9 +17,11 @@ describe("components/AppLayout", () => {
   beforeAll(() => {
     wrapper = ({ children }) => {
       return (
-        <Router navigator={history} location={history.location}>
-          {children}
-        </Router>
+        <RecoilRoot>
+          <Router navigator={history} location={history.location}>
+            {children}
+          </Router>
+        </RecoilRoot>
       )
     }
   })
