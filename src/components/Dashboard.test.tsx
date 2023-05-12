@@ -14,8 +14,30 @@ import useLastTransactions from "../hooks/last-transactions"
 vi.mock("../hooks/last-transactions")
 
 describe("components/dashboard", () => {
+  class ResizeObserver {
+    observe() {
+      // do nothing
+    }
+    unobserve() {
+      // do nothing
+    }
+    disconnect() {
+      // do nothing
+    }
+  }
+
+  const original = window.ResizeObserver
+
+  beforeAll(() => {
+    window.ResizeObserver = ResizeObserver
+  })
+
   afterEach(() => {
     vi.clearAllMocks()
+  })
+
+  afterAll(() => {
+    window.ResizeObserver = original
   })
 
   it("renders", () => {
@@ -30,7 +52,7 @@ describe("components/dashboard", () => {
       {
         id: "transactionId",
         amount: 100,
-        date: now.toISOString(),
+        date: now,
         monetaryOperation: "income",
         tags: [],
       },
@@ -45,7 +67,10 @@ describe("components/dashboard", () => {
 
     expect(screen.getByText("100.00")).toBeInTheDocument()
     expect(
-      screen.getByText(format(now, "yyyy-MM-dd HH:mm:ss")),
+      screen.getByText(new RegExp(format(now, "yyyy-MM-dd"))),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(new RegExp(format(now, "HH:mm"))),
     ).toBeInTheDocument()
   })
 })
