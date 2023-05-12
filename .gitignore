@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Application specific
-src/firebase.config.ts
+.env.local
