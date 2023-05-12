@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useSetRecoilState } from "recoil"
 import { collection, onSnapshot, query, where } from "firebase/firestore"
 
-import { Tags } from "../types"
+import { TagMap } from "../types"
 import { auth, db } from "../firebase"
 import { aTags } from "../state/atoms/ui"
 
@@ -19,10 +19,10 @@ const useTags = () => {
       )
 
       const unsubscribe = onSnapshot(tagsSnapshot, (querySnapshot) => {
-        const newTags: Tags = {}
+        const newTags: TagMap = {}
 
         querySnapshot.docs.forEach((document) => {
-          newTags[document.id] = document.data().name
+          newTags[document.id] = document.data().title
         })
 
         setTags(newTags)
