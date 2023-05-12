@@ -9,7 +9,7 @@ import { TextField, TextFieldProps } from "@mui/material"
 type Props<T extends FieldValues> = {
   name: UseControllerProps<T>["name"]
   control: UseFormReturn<T>["control"]
-  rules: UseControllerProps<T>["rules"]
+  rules?: UseControllerProps<T>["rules"]
 } & TextFieldProps
 
 const FormTextField = <T extends FieldValues>({
