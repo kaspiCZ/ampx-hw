@@ -81,9 +81,14 @@ describe("components/IncomeExpenseModal", () => {
               transaction: {
                 id: "transactionId",
                 amount: 1000,
-                date: now.toISOString(),
+                date: now,
                 monetaryOperation: "income",
-                tags: ["tagId"],
+                tags: [
+                  {
+                    title: "sport",
+                    id: "tagId",
+                  },
+                ],
               },
             })
             set(aIncomeExpenseModalOpen, true)

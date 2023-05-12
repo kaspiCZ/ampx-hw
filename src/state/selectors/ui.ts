@@ -1,9 +1,9 @@
 import { selector } from "recoil"
 
 import { aTags } from "../atoms/ui"
-import { TagAsAutocompleteOption } from "../../types"
+import { Tag } from "../../types"
 
-export const aTagsAsOptions = selector<TagAsAutocompleteOption[]>({
+export const aTagsAsOptions = selector<Tag[]>({
   key: "tags-as-options",
   get: ({ get }) => {
     const tags = get(aTags)
