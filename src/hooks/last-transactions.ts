@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useRecoilValue } from "recoil"
 import {
+  QueryConstraint,
   collection,
   limit,
   onSnapshot,
@@ -15,17 +16,24 @@ import { aTags } from "../state/atoms/ui"
 
 // TODO write tests with Firebase mocks
 
-const useLastTransactions = () => {
+const useLastTransactions = (limitTo = 10) => {
   const mappedTags = useRecoilValue(aTags)
   const [transactions, setTransactions] = useState<Transaction[]>()
 
   useEffect(() => {
     try {
+      const constraints: QueryConstraint[] = [
+        where("uid", "==", auth.currentUser?.uid),
+        orderBy("date", limitTo > 0 ? "desc" : "asc"),
+      ]
+
+      if (limitTo > 0) {
+        constraints.push(limit(limitTo))
+      }
+
       const transactionsSnapshot = query(
         collection(db, "transactions"),
-        where("uid", "==", auth.currentUser?.uid),
-        orderBy("date", "desc"),
-        limit(10),
+        ...constraints,
       )
 
       const unsubscribe = onSnapshot(transactionsSnapshot, (querySnapshot) => {
@@ -37,15 +45,25 @@ const useLastTransactions = () => {
               date,
               monetaryOperation,
               tags: tagsRef,
+              info,
             } = document.data()
 
-            return {
+            const transaction: Transaction = {
               id,
               amount,
-              date,
+              date: new Date(date),
               monetaryOperation,
-              tags: tagsRef?.map(({ id }: { id: string }) => mappedTags?.[id]),
+              tags: tagsRef?.map(({ id }: { id: string }) => ({
+                id,
+                title: mappedTags?.[id],
+              })),
             }
+
+            if (info) {
+              transaction.info = info
+            }
+
+            return transaction
           }),
         )
       })
@@ -56,7 +74,7 @@ const useLastTransactions = () => {
     } catch (error) {
       console.error(error)
     }
-  }, [mappedTags])
+  }, [limitTo, mappedTags])
 
   return transactions
 }
