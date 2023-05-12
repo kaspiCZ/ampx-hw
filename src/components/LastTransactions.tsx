@@ -60,8 +60,8 @@ const LastTransactions = () => {
                 "& td": {
                   color:
                     transaction.monetaryOperation === "expense"
-                      ? theme.palette.error.main
-                      : theme.palette.success.main,
+                      ? theme.palette.error[theme.palette.mode]
+                      : theme.palette.success[theme.palette.mode],
                 },
                 "&:last-child td, &:last-child th": { border: 0 },
               }}
