@@ -1,47 +1,78 @@
+import { useEffect, useState } from "react"
 import { Controller, SubmitHandler, useForm } from "react-hook-form"
 import { useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil"
-import { addDoc, collection, doc, updateDoc } from "firebase/firestore"
-import { Button, Unstable_Grid2 as Grid } from "@mui/material"
+import {
+  DocumentData,
+  DocumentReference,
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+} from "firebase/firestore"
+import {
+  Button,
+  Unstable_Grid2 as Grid,
+  createFilterOptions,
+} from "@mui/material"
 
-import { MonetaryOperation } from "../../types"
+import { Transaction, Tag } from "../../types"
 import {
   aIncomeExpenseModalState,
   aIncomeExpenseModalOpen,
 } from "../../state/atoms/ui"
+import { aTagsAsOptions } from "../../state/selectors/ui"
 import { auth, db } from "../../firebase"
 
 import FormDateTimePicker from "./FormDateTimePicker"
 import FormTextField from "./FormTextField"
+import FormAutocomplete from "./FormAutocomplete"
 
 const TextField = FormTextField<Form>
 const DateTimePicker = FormDateTimePicker<Form>
+const Autocomplete = FormAutocomplete<Form, Tag, true, false, true>
 
-type Form = {
-  monetaryOperation: MonetaryOperation
-  amount: number
-  date: Date
+const filter = createFilterOptions<Tag>()
+
+type Form = Omit<Transaction, "id">
+
+type SaveData = Pick<Transaction, "amount" | "info" | "monetaryOperation"> & {
+  date: string
+  tags: DocumentReference<DocumentData>[]
 }
 
+/**
+ * TODO update test with new fields
+ */
 const IncomeExpenseForm = () => {
   const setOpen = useSetRecoilState(aIncomeExpenseModalOpen)
   const { monetaryOperation, transaction } = useRecoilValue(
     aIncomeExpenseModalState,
   )
   const resetModalState = useResetRecoilState(aIncomeExpenseModalState)
+  const tagsAsOptions = useRecoilValue(aTagsAsOptions)
+  const [options, setOptions] = useState<Tag[]>([])
 
-  let defaultValues = {
+  useEffect(() => {
+    setOptions(tagsAsOptions)
+  }, [tagsAsOptions])
+
+  let defaultValues: Form = {
     monetaryOperation,
     amount: 0,
     date: new Date(),
+    tags: [],
+    info: "",
   }
 
   if (transaction) {
-    const { amount, monetaryOperation, date } = transaction
+    const { amount, monetaryOperation, date, tags, info } = transaction
 
     defaultValues = {
       monetaryOperation,
       amount,
       date: new Date(date),
+      tags: tags || [],
+      info: info || "",
     }
   }
 
@@ -52,10 +83,25 @@ const IncomeExpenseForm = () => {
 
   const onSubmit: SubmitHandler<Form> = async (data) => {
     try {
-      const saveData = {
+      for (const tag of data.tags) {
+        if (tag.id) {
+          continue
+        }
+
+        const newTag = await addDoc(collection(db, "tags"), {
+          uid: auth.currentUser?.uid,
+          title: tag.inputValue ? tag.inputValue : tag.title,
+        })
+
+        tag.id = newTag.id
+      }
+
+      const saveData: SaveData = {
         amount: +data.amount,
         monetaryOperation: data.monetaryOperation,
         date: data.date.toISOString(),
+        tags: data.tags.map((tag) => doc(db, `/tags/${tag.id}`)),
+        info: data.info || "",
       }
 
       if (transaction?.id) {
@@ -93,15 +139,57 @@ const IncomeExpenseForm = () => {
               required: "This field is required",
               pattern: { value: /^\d+$/, message: "Fill in numbers only" },
             }}
-            data-testid="amount"
+          />
+        </Grid>
+        <Grid>
+          <Autocomplete
+            name="tags"
+            label="Tags"
+            multiple
+            freeSolo
+            control={control}
+            options={options}
+            filterSelectedOptions
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.title
+            }
+            isOptionEqualToValue={(option, value) =>
+              option.title === value.title
+            }
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params)
+              const { inputValue } = params
+
+              const isExisting = options.some(
+                (option) => inputValue === option.title,
+              )
+
+              if (inputValue !== "" && !isExisting) {
+                filtered.push({
+                  inputValue,
+                  title: `Add "${inputValue}"`,
+                })
+              }
+
+              return filtered
+            }}
           />
         </Grid>
         <Grid>
           <DateTimePicker
+            sx={{ width: "100%" }}
             name="date"
             label="Date"
             control={control}
             data-testid="datetime"
+          />
+        </Grid>
+        <Grid>
+          <TextField
+            fullWidth
+            name="info"
+            control={control}
+            label="(Optional) Info"
           />
         </Grid>
         <Grid>
