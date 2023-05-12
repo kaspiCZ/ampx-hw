@@ -2,6 +2,7 @@ import { useSetRecoilState } from "recoil"
 import { deleteDoc, doc } from "firebase/firestore"
 import {
   Chip,
+  Unstable_Grid2 as Grid,
   IconButton,
   Paper,
   Table,
@@ -10,10 +11,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material"
-import { Delete, Edit } from "@mui/icons-material"
+import { Delete, Edit, InfoOutlined } from "@mui/icons-material"
 import { format } from "date-fns"
 
 import { db } from "../firebase"
@@ -42,11 +44,12 @@ const LastTransactions = () => {
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Date</TableCell>
+            <TableCell width={120}>Date</TableCell>
             <TableCell>Tags</TableCell>
             <TableCell align="right">Amount</TableCell>
-            <TableCell width={2}></TableCell>
-            <TableCell width={2}></TableCell>
+            <TableCell width={1}></TableCell>
+            <TableCell width={1}></TableCell>
+            <TableCell width={1}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -64,17 +67,30 @@ const LastTransactions = () => {
               }}
             >
               <TableCell>
-                {format(new Date(transaction.date), "yyyy-MM-dd HH:mm:ss")}
+                {format(transaction.date, "yyyy-MM-dd")}
+                <br />
+                {format(transaction.date, "HH:mm")}
               </TableCell>
               <TableCell>
-                {transaction?.tags?.map((tag, index) => (
-                  <Chip label={tag} key={`${tag}-${index}`} />
-                ))}
+                <Grid container spacing={1}>
+                  {transaction?.tags?.map((tag, index) => (
+                    <Grid key={`${tag}-${index}`}>
+                      <Chip label={tag.title} />
+                    </Grid>
+                  ))}
+                </Grid>
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h4">
                   {transaction.amount.toFixed(2)}
                 </Typography>
+              </TableCell>
+              <TableCell>
+                {transaction.info ? (
+                  <Tooltip title={transaction.info}>
+                    <InfoOutlined />
+                  </Tooltip>
+                ) : null}
               </TableCell>
               <TableCell>
                 <IconButton
