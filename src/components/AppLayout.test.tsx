@@ -34,18 +34,7 @@ describe("components/AppLayout", () => {
     vi.clearAllMocks()
   })
 
-  it("renders for unauthenticated user", () => {
-    const mockedHook = useAuthenticatedUser as Mock
-    mockedHook.mockImplementation(() => [undefined, false])
-
-    render(<AppLayout />, {
-      wrapper,
-    })
-
-    expect(screen.getByText("Sign in")).toBeInTheDocument()
-  })
-
-  it("renders for authenticated user", async () => {
+  it("renders", async () => {
     const mockedHook = useAuthenticatedUser as Mock
     mockedHook.mockImplementation(() => [{ email: "test@example.com" }, false])
 

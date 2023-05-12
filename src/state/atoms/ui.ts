@@ -1,6 +1,14 @@
 import { atom } from "recoil"
+import { PaletteMode } from "@mui/material"
 
 import { MonetaryOperation, Tags, Transaction } from "../../types"
+import localStorageEffect from "../effects/local-storage"
+
+export const aPaletteMode = atom<PaletteMode>({
+  key: "palette-mode",
+  default: "light",
+  effects: [localStorageEffect("palette-mode")],
+})
 
 export const aTags = atom<Tags | Record<string, never>>({
   key: "tags",

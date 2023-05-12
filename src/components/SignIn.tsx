@@ -1,7 +1,6 @@
 import { FormEventHandler, useEffect, useState } from "react"
 import { redirect, useNavigate } from "react-router-dom"
 import { signInWithEmailAndPassword } from "firebase/auth"
-
 import { Button, TextField } from "@mui/material"
 
 import { INDEX } from "../constants/routes"

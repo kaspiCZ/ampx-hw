@@ -1,8 +1,10 @@
 import { lazy } from "react"
+import { useRecoilValue } from "recoil"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import CssBaseline from "@mui/material/CssBaseline"
+import { createTheme, CssBaseline, ThemeProvider } from "@mui/material"
 
 import { DASHBOARD, INDEX, SIGN_IN, SIGN_OUT } from "./constants/routes"
+import { aPaletteMode } from "./state/atoms/ui"
 
 import AuthGuard from "./components/AuthGuard"
 
@@ -12,9 +14,15 @@ const Dashboard = lazy(() => import("./components/Dashboard"))
 const SignIn = lazy(() => import("./components/SignIn"))
 const SignOut = lazy(() => import("./components/SignOut"))
 
-function App() {
+const App = () => {
+  const mode = useRecoilValue(aPaletteMode)
+
+  const theme = createTheme({
+    palette: { mode },
+  })
+
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
         <Routes>
@@ -30,7 +38,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </ThemeProvider>
   )
 }
 
