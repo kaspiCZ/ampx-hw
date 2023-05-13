@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material"
 
-import { SIGN_IN } from "../constants/routes"
+import { REGISTER, SIGN_IN } from "../constants/routes"
 
 const Intro = () => {
   const [, startTransition] = useTransition()
@@ -28,7 +28,12 @@ const Intro = () => {
               <Typography variant="subtitle1">I want it</Typography>
             </CardContent>
             <CardActions>
-              <Button variant="contained">Register</Button>
+              <Button
+                variant="contained"
+                onClick={() => startTransition(() => navigate(REGISTER))}
+              >
+                Register
+              </Button>
             </CardActions>
           </Card>
         </Grid>
