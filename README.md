@@ -89,3 +89,11 @@ Extract data handling to separate scripts for easier mocking
 Improve test coverage of the Modal with form
 
 Custom MUI theme (palette, etc.)
+
+# Notes
+
+Didn't install vitest peer deps, because I'm going to avoid palywright and other deps for now.
+
+# Time tracked
+
+![Screenshot of time tracked](time_tracked.png)
