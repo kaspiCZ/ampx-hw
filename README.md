@@ -18,13 +18,13 @@ These are the recommended Firestore rules for multi-user environment:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-  	match /transactions/{transaction} {
-    	allow write: if request.auth != null // && request.auth.uid == request.resource.data.uid
+    match /transactions/{transaction} {
+      allow write: if request.auth != null // && request.auth.uid == request.resource.data.uid
       allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.uid
     }
 
     match /tags/{tag} {
-    	allow write: if request.auth != null // && request.auth.uid == request.resource.data.uid
+      allow write: if request.auth != null // && request.auth.uid == request.resource.data.uid
       allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.uid
     }
 
