@@ -1,6 +1,7 @@
 import { Mock } from "vitest"
 import { Router } from "react-router"
 import { MemoryHistory, createMemoryHistory } from "history"
+import { RecoilRoot } from "recoil"
 
 import { RenderOptions, render, waitFor } from "../utils/test-utils"
 
@@ -12,16 +13,18 @@ vi.mock("../hooks/authenticated-user")
 import { signOut } from "firebase/auth"
 vi.mock("firebase/auth")
 
-describe("components/AuthGuard", () => {
+describe("components/SignOut", () => {
   let wrapper: RenderOptions["wrapper"]
   let history: MemoryHistory
 
   beforeAll(() => {
     wrapper = ({ children }) => {
       return (
-        <Router navigator={history} location={history.location}>
-          {children}
-        </Router>
+        <RecoilRoot>
+          <Router navigator={history} location={history.location}>
+            {children}
+          </Router>
+        </RecoilRoot>
       )
     }
   })

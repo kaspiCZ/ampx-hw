@@ -1,8 +1,15 @@
 import { Mock } from "vitest"
 import { Router } from "react-router"
 import { MemoryHistory, createMemoryHistory } from "history"
+import { RecoilRoot } from "recoil"
 
-import { RenderOptions, render, screen, userEvent } from "../utils/test-utils"
+import {
+  RenderOptions,
+  render,
+  screen,
+  userEvent,
+  waitFor,
+} from "../utils/test-utils"
 
 import SignIn from "./SignIn"
 
@@ -12,16 +19,18 @@ vi.mock("../hooks/authenticated-user")
 import { signInWithEmailAndPassword } from "firebase/auth"
 vi.mock("firebase/auth")
 
-describe("components/AuthGuard", () => {
+describe("components/SignIn", () => {
   let wrapper: RenderOptions["wrapper"]
   let history: MemoryHistory
 
   beforeAll(() => {
     wrapper = ({ children }) => {
       return (
-        <Router navigator={history} location={history.location}>
-          {children}
-        </Router>
+        <RecoilRoot>
+          <Router navigator={history} location={history.location}>
+            {children}
+          </Router>
+        </RecoilRoot>
       )
     }
   })
@@ -34,7 +43,9 @@ describe("components/AuthGuard", () => {
     vi.clearAllMocks()
   })
 
-  it("redirects authenticated user to /", () => {
+  it("redirects authenticated user to /home", () => {
+    history.push("/signin")
+
     const mockedHook = useAuthenticatedUser as Mock
     mockedHook.mockImplementation(() => [{ email: "test@example.com" }, false])
 
@@ -44,10 +55,12 @@ describe("components/AuthGuard", () => {
     render(<SignIn />, { wrapper })
 
     expect(screen.queryByText("Sign in")).not.toBeInTheDocument()
-    expect(history.location.pathname).toBe("/")
+    expect(history.location.pathname).toBe("/home")
   })
 
-  it("renders from and authenticates user", async () => {
+  it("renders form and authenticates user", async () => {
+    history.push("/signin")
+
     const mockedHook = useAuthenticatedUser as Mock
     mockedHook.mockImplementation(() => [undefined, false])
 
@@ -56,9 +69,19 @@ describe("components/AuthGuard", () => {
 
     render(<SignIn />, { wrapper })
 
-    const button = screen.getByText("Sign in")
+    expect(history.location.pathname).toBe("/signin")
+
+    const email = screen.getByLabelText("E-mail")
+    await userEvent.type(email, "test@example.com")
+
+    const password = screen.getByLabelText("Password")
+    await userEvent.type(password, "Test1234")
+
+    const button = screen.getByRole("button")
     await userEvent.click(button)
 
-    expect(history.location.pathname).toBe("/")
+    await waitFor(() => {
+      expect(history.location.pathname).toBe("/home")
+    })
   })
 })
