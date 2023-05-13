@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { SubmitHandler, useForm } from "react-hook-form"
+import { useResetRecoilState, useSetRecoilState } from "recoil"
 import {
   Button,
   Card,
@@ -10,11 +11,13 @@ import {
   Unstable_Grid2 as Grid,
   useTheme,
   Typography,
+  Alert,
 } from "@mui/material"
 
 import { DASHBOARD } from "../constants/routes"
 import { auth } from "../firebase"
 import useAuthenticatedUser from "../hooks/authenticated-user"
+import { aSnackbar } from "../state/atoms/ui"
 
 import FormTextField from "./form/FormTextField"
 
@@ -30,6 +33,8 @@ const Register = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [user, loading] = useAuthenticatedUser()
+  const setSnackbarState = useSetRecoilState(aSnackbar)
+  const resetSnackbarState = useResetRecoilState(aSnackbar)
 
   const { control, handleSubmit } = useForm<Form>({
     mode: "onChange",
@@ -45,7 +50,32 @@ const Register = () => {
       await createUserWithEmailAndPassword(auth, data.email, data.password)
 
       navigate(DASHBOARD)
+
+      setSnackbarState({
+        open: true,
+        children: (
+          <Alert
+            onClose={() => resetSnackbarState()}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Registered and signed in 🙌 welcome
+          </Alert>
+        ),
+      })
     } catch (error) {
+      setSnackbarState({
+        open: true,
+        children: (
+          <Alert
+            onClose={() => resetSnackbarState()}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            Failed to register your new account 😔
+          </Alert>
+        ),
+      })
       console.error(error)
     }
   }

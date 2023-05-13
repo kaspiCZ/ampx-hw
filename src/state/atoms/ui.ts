@@ -1,5 +1,5 @@
 import { atom } from "recoil"
-import { PaletteMode } from "@mui/material"
+import { PaletteMode, SnackbarProps } from "@mui/material"
 
 import { MonetaryOperation, TagMap, Transaction } from "../../types"
 import localStorageEffect from "../effects/local-storage"
@@ -8,6 +8,16 @@ export const aPaletteMode = atom<PaletteMode>({
   key: "palette-mode",
   default: "light",
   effects: [localStorageEffect("palette-mode")],
+})
+
+export const aSnackbar = atom<{
+  open: boolean
+  children?: SnackbarProps["children"]
+}>({
+  key: "snackbar",
+  default: {
+    open: false,
+  },
 })
 
 export const aTags = atom<TagMap | Record<string, never>>({

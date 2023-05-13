@@ -1,25 +1,50 @@
 import { lazy } from "react"
-import { useRecoilValue } from "recoil"
+import { useRecoilValue, useResetRecoilState } from "recoil"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material"
+import {
+  createTheme,
+  CssBaseline,
+  Snackbar,
+  ThemeProvider,
+} from "@mui/material"
 
-import { DASHBOARD, INDEX, SIGN_IN, SIGN_OUT } from "./constants/routes"
-import { aPaletteMode } from "./state/atoms/ui"
+import {
+  DASHBOARD,
+  INDEX,
+  REGISTER,
+  SIGN_IN,
+  SIGN_OUT,
+} from "./constants/routes"
+import { aPaletteMode, aSnackbar } from "./state/atoms/ui"
 
 import AuthGuard from "./components/AuthGuard"
 
 const AppLayout = lazy(() => import("./components/AppLayout"))
 const Intro = lazy(() => import("./components/Intro"))
 const Dashboard = lazy(() => import("./components/Dashboard"))
+const Register = lazy(() => import("./components/Register"))
 const SignIn = lazy(() => import("./components/SignIn"))
 const SignOut = lazy(() => import("./components/SignOut"))
 
 const App = () => {
   const mode = useRecoilValue(aPaletteMode)
+  const snackbarState = useRecoilValue(aSnackbar)
+  const resetSnackbarState = useResetRecoilState(aSnackbar)
 
   const theme = createTheme({
     palette: { mode },
   })
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string,
+  ) => {
+    if (reason === "clickaway") {
+      return
+    }
+
+    resetSnackbarState()
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -28,6 +53,7 @@ const App = () => {
         <Routes>
           <Route element={<AuthGuard allow="anonymous" />}>
             <Route path={INDEX} element={<Intro />} />
+            <Route path={REGISTER} element={<Register />} />
             <Route path={SIGN_IN} element={<SignIn />} />
           </Route>
           <Route element={<AuthGuard />}>
@@ -38,6 +64,12 @@ const App = () => {
           </Route>
         </Routes>
       </BrowserRouter>
+      <Snackbar
+        open={snackbarState.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        children={snackbarState.children}
+      />
     </ThemeProvider>
   )
 }

@@ -10,6 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore"
 import {
+  Alert,
   Button,
   Unstable_Grid2 as Grid,
   createFilterOptions,
@@ -19,6 +20,7 @@ import { Transaction, Tag } from "../../types"
 import {
   aIncomeExpenseModalState,
   aIncomeExpenseModalOpen,
+  aSnackbar,
 } from "../../state/atoms/ui"
 import { aTagsAsOptions } from "../../state/selectors/ui"
 import { auth, db } from "../../firebase"
@@ -49,6 +51,8 @@ const IncomeExpenseForm = () => {
     aIncomeExpenseModalState,
   )
   const resetModalState = useResetRecoilState(aIncomeExpenseModalState)
+  const setSnackbarState = useSetRecoilState(aSnackbar)
+  const resetSnackbarState = useResetRecoilState(aSnackbar)
   const tagsAsOptions = useRecoilValue(aTagsAsOptions)
   const [options, setOptions] = useState<Tag[]>([])
 
@@ -112,7 +116,32 @@ const IncomeExpenseForm = () => {
           ...saveData,
         })
       }
+
+      setSnackbarState({
+        open: true,
+        children: (
+          <Alert
+            onClose={() => resetSnackbarState()}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Success 👍
+          </Alert>
+        ),
+      })
     } catch (error) {
+      setSnackbarState({
+        open: true,
+        children: (
+          <Alert
+            onClose={() => resetSnackbarState()}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            An error occured 😔
+          </Alert>
+        ),
+      })
       console.error(error)
     }
 
